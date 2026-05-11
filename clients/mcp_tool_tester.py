@@ -124,7 +124,7 @@ async def exa_code_search_test(session: ClientSession) -> dict[str, Any]:
 
     list_result = await call_tool_json(session, "list_memories", {
         "filters": {"user_id": "test_user"},
-        "page_size": 20,
+        "limit": 20,
     })
 
     memories = list_result.get('memories', [])

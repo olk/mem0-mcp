@@ -28,7 +28,7 @@ def recall_memories(
     user_id: str,
     agent_id: str | None = None,
     session_id: str | None = None,
-    limit: int = 10,
+    limit: str = "10",
 ) -> PromptResult:
     """Render a prompt for semantic memory search.
 
@@ -42,7 +42,7 @@ def recall_memories(
             "agent_id": agent_id,
             "session_id": session_id,
         },
-        "limit": limit,
+        "limit": int(limit) if limit else 10,
     }
     return PromptResult(messages=[Message(content=json.dumps(payload, indent=2))])
 
@@ -55,7 +55,7 @@ def get_user_context(
     user_id: str,
     agent_id: str | None = None,
     session_id: str | None = None,
-    limit: int = 50,
+    limit: str = "50",
 ) -> PromptResult:
     """Render a prompt to retrieve all memories for a user.
 
@@ -68,7 +68,7 @@ def get_user_context(
             "agent_id": agent_id,
             "session_id": session_id,
         },
-        "limit": limit,
+        "limit": int(limit) if limit else 50,
     }
     return PromptResult(messages=[Message(content=json.dumps(payload, indent=2))])
 
@@ -162,7 +162,7 @@ def summarize_for_storage(
 def get_preferences(
     user_id: str,
     topic: str | None = None,
-    limit: int = 20,
+    limit: str = "20",
 ) -> PromptResult:
     """Render a prompt to retrieve user preferences.
 
@@ -179,7 +179,7 @@ def get_preferences(
     payload = {
         "prompt": "get_preferences",
         "filters": filters,
-        "limit": limit,
+        "limit": int(limit) if limit else 20,
         "note": "Filter results for preference-related memories",
     }
     return PromptResult(messages=[Message(content=json.dumps(payload, indent=2))])
