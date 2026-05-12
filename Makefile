@@ -65,6 +65,10 @@ test-integration: install ## Run integration tests (requires Docker stack)
 	done
 	@echo "All services healthy. Running integration tests..."
 	uv run pytest tests/integration/ -v --tb=short -m integration
+	@echo "Stopping Docker services..."
+	docker compose down ollama-qwen3-embedding
+	docker compose down ollama-qwen
+	docker compose down mem0-mcp
 	@echo "Integration tests complete."
 
 test-all: install ## Run unit and integration tests
