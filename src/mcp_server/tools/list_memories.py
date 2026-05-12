@@ -11,7 +11,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from fastmcp import Context, FastMCP
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, ValidationError, model_validator
 
 if TYPE_CHECKING:
     from fastmcp import FastMCP
@@ -198,6 +198,13 @@ def register_list_memories_tool(mcp: "FastMCP") -> None:
                 total_count=total_count,
             )
 
+        except ValidationError as e:
+            # Pydantic validation errors are user-facing, not server errors
+            logger.warning(
+                f"list_memories validation failed: {e}",
+                extra={"logging_context": ["memory", "validation"]}
+            )
+            raise ValueError(f"ERR_400: {e}") from e
         except ValueError:
             raise
         except Exception as e:

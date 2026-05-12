@@ -11,7 +11,7 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from fastmcp import Context, FastMCP
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, ValidationError, field_validator, model_validator
 
 if TYPE_CHECKING:
     from fastmcp import FastMCP
@@ -246,6 +246,13 @@ def register_search_memories_tool(mcp: "FastMCP") -> None:
 
             return SearchMemoriesOutput(results=search_results)
 
+        except ValidationError as e:
+            # Pydantic validation errors are user-facing, not server errors
+            logger.warning(
+                f"search_memories validation failed: {e}",
+                extra={"logging_context": ["memory", "validation"]}
+            )
+            raise ValueError(f"ERR_400: {e}") from e
         except ValueError:
             raise
         except ConnectionError as e:

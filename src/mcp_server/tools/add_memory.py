@@ -207,6 +207,13 @@ def register_add_memory_tool(mcp: "FastMCP") -> None:
 
             return AddMemoryOutput(results=memory_results)
 
+        except ValidationError as e:
+            # Pydantic validation errors are user-facing, not server errors
+            logger.warning(
+                f"add_memory validation failed: {e}",
+                extra={"logging_context": ["memory", "validation"]}
+            )
+            raise ValueError(f"ERR_400: {e}") from e
         except Exception as e:
             logger.error(
                 f"add_memory failed: {e}",

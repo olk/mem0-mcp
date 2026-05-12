@@ -11,7 +11,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from fastmcp import Context, FastMCP
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 if TYPE_CHECKING:
     from fastmcp import FastMCP
@@ -177,6 +177,13 @@ def register_erase_memories_tool(mcp: "FastMCP") -> None:
                 deleted=deleted,
             )
 
+        except ValidationError as e:
+            # Pydantic validation errors are user-facing, not server errors
+            logger.warning(
+                f"erase_memories validation failed: {e}",
+                extra={"logging_context": ["memory", "validation"]}
+            )
+            raise ValueError(f"ERR_400: {e}") from e
         except Exception as e:
             logger.error(
                 f"erase_memories failed: {e}",

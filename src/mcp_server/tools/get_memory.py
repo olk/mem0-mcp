@@ -11,7 +11,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from fastmcp import Context, FastMCP
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 if TYPE_CHECKING:
     from fastmcp import FastMCP
@@ -133,6 +133,13 @@ def register_get_memory_tool(mcp: "FastMCP") -> None:
                 updated_at=None,
             )
 
+        except ValidationError as e:
+            # Pydantic validation errors are user-facing, not server errors
+            logger.warning(
+                f"get_memory validation failed: {e}",
+                extra={"logging_context": ["memory", "validation"]}
+            )
+            raise ValueError(f"ERR_400: {e}") from e
         except Exception as e:
             error_msg = str(e).lower()
             if "not found" in error_msg or "404" in error_msg or "does not exist" in error_msg:
