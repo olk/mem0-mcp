@@ -28,12 +28,18 @@ def recall_memories(
     user_id: str,
     agent_id: str | None = None,
     session_id: str | None = None,
-    limit: str = "10",
+    limit: int | str = 10,
 ) -> PromptResult:
     """Render a prompt for semantic memory search.
 
     Returns JSON payload with search parameters for search_memories tool.
     """
+    resolved_limit: int
+    if isinstance(limit, str) and limit.startswith("$"):
+        resolved_limit = 10
+    else:
+        resolved_limit = int(limit) if isinstance(limit, str) else limit
+
     payload = {
         "prompt": "recall_memories",
         "query": query,
@@ -42,7 +48,7 @@ def recall_memories(
             "agent_id": agent_id,
             "session_id": session_id,
         },
-        "limit": int(limit) if limit else 10,
+        "limit": resolved_limit or 10,
     }
     return PromptResult(messages=[Message(content=json.dumps(payload, indent=2))])
 
@@ -55,12 +61,18 @@ def get_user_context(
     user_id: str,
     agent_id: str | None = None,
     session_id: str | None = None,
-    limit: str = "50",
+    limit: int | str = 50,
 ) -> PromptResult:
     """Render a prompt to retrieve all memories for a user.
 
     Returns JSON payload with filters for list_memories tool.
     """
+    resolved_limit: int
+    if isinstance(limit, str) and limit.startswith("$"):
+        resolved_limit = 50
+    else:
+        resolved_limit = int(limit) if isinstance(limit, str) else limit
+
     payload = {
         "prompt": "get_user_context",
         "filters": {
@@ -68,7 +80,7 @@ def get_user_context(
             "agent_id": agent_id,
             "session_id": session_id,
         },
-        "limit": int(limit) if limit else 50,
+        "limit": resolved_limit or 50,
     }
     return PromptResult(messages=[Message(content=json.dumps(payload, indent=2))])
 
@@ -162,7 +174,7 @@ def summarize_for_storage(
 def get_preferences(
     user_id: str,
     topic: str | None = None,
-    limit: str = "20",
+    limit: int | str = 20,
 ) -> PromptResult:
     """Render a prompt to retrieve user preferences.
 
@@ -176,10 +188,16 @@ def get_preferences(
     if topic:
         filters["metadata"] = {"topic": {"icontains": topic}}
 
+    resolved_limit: int
+    if isinstance(limit, str) and limit.startswith("$"):
+        resolved_limit = 20
+    else:
+        resolved_limit = int(limit) if isinstance(limit, str) else limit
+
     payload = {
         "prompt": "get_preferences",
         "filters": filters,
-        "limit": int(limit) if limit else 20,
+        "limit": resolved_limit or 20,
         "note": "Filter results for preference-related memories",
     }
     return PromptResult(messages=[Message(content=json.dumps(payload, indent=2))])
