@@ -48,6 +48,18 @@ def unique_memory_content() -> str:
 
 
 @pytest.fixture
+def unique_org_id() -> str:
+    """Unique organization ID per test."""
+    return f"test_org_{uuid.uuid4().hex[:8]}"
+
+
+@pytest.fixture
+def unique_project_id() -> str:
+    """Unique project ID per test."""
+    return f"test_project_{uuid.uuid4().hex[:8]}"
+
+
+@pytest.fixture
 def tenant_scope_factory():
     """Factory to create isolated tenant scopes per test.
 

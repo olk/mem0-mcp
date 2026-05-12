@@ -39,6 +39,7 @@ test-integration: install ## Run integration tests (requires Docker stack)
 	@echo "Starting Docker services..."
 	docker compose up -d --wait ollama-qwen3-embedding
 	docker compose up -d --wait ollama-qwen
+	docker compose up -d mem0-mcp
 	@echo "Waiting for Ollama to be healthy..."
 	@timeout=60; \
 	while ! docker compose exec -T ollama-qwen3-embedding ollama list 2>/dev/null | grep -q qwen3-embedding; do \
@@ -50,7 +51,19 @@ test-integration: install ## Run integration tests (requires Docker stack)
 			exit 1; \
 		fi; \
 	done
-	@echo "Ollama is healthy. Running integration tests..."
+	@echo "Waiting for mem0-mcp to be healthy..."
+	@timeout=60; \
+	while ! curl -sf http://localhost:8050/health > /dev/null 2>&1; do \
+		echo "Waiting for mem0-mcp..."; \
+		sleep 5; \
+		timeout=$$((timeout - 1)); \
+		if [ $$timeout -le 0 ]; then \
+			echo "Timeout waiting for mem0-mcp"; \
+			docker compose logs mem0-mcp; \
+			exit 1; \
+		fi; \
+	done
+	@echo "All services healthy. Running integration tests..."
 	uv run pytest tests/integration/ -v --tb=short -m integration
 	@echo "Integration tests complete."
 
